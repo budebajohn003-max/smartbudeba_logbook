@@ -2,10 +2,22 @@ import { getCurrentUser, logoutUser, getMyLogbooks, getPendingLogbooks, fetchLog
 
 const page = window.location.pathname.split('/').pop();
 const currentUser = await getCurrentUser();
-if (!currentUser) window.location.href = 'index.html';
+if (!currentUser) {
+  window.location.replace('index.html');
+  throw new Error('Authentication is required to view this dashboard.');
+}
 
 const expectedRole = page === 'student_dashboard.html' ? 'student' : page === 'supervisor_dashboard.html' ? 'supervisor' : null;
-if (expectedRole && currentUser?.role !== expectedRole) window.location.href = 'index.html';
+if (expectedRole && currentUser.role !== expectedRole) {
+  window.location.replace(
+    currentUser.role === 'admin'
+      ? 'admin_dashboard.html'
+      : currentUser.role === 'supervisor'
+        ? 'supervisor_dashboard.html'
+        : 'student_dashboard.html',
+  );
+  throw new Error('This dashboard is not available for the current role.');
+}
 
 document.querySelectorAll('#logoutBtn').forEach((button) => {
   button.addEventListener('click', async (event) => {
