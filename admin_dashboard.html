@@ -233,7 +233,10 @@
 
         const currentUser = await getCurrentUser();
         if (!currentUser || currentUser.role !== 'admin') {
-            window.location.href = 'index.html';
+            window.location.replace(
+                !currentUser ? 'index.html' : currentUser.role === 'supervisor' ? 'supervisor_dashboard.html' : 'student_dashboard.html'
+            );
+            throw new Error('Only administrators can access the administrator dashboard.');
         }
 
         // Initialize Lucide Icons
