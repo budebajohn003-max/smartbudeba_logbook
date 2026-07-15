@@ -1,9 +1,16 @@
 import { getCurrentUser, getLogbookById, reviewLogbook } from './logbook_service.js';
 
 const user = await getCurrentUser();
-if (!user || !['supervisor', 'admin'].includes(user.role)) window.location.href = 'index.html';
+const homeForUser = user?.role === 'admin' ? 'admin_dashboard.html' : 'supervisor_dashboard.html';
+if (!user || !['supervisor', 'admin'].includes(user.role)) {
+  window.location.replace(user ? 'student_dashboard.html' : 'index.html');
+  throw new Error('Only supervisors and administrators can review logbooks.');
+}
 const id = new URLSearchParams(window.location.search).get('id');
-if (!id) window.location.href = 'supervisor_dashboard.html';
+if (!id) {
+  window.location.replace(homeForUser);
+  throw new Error('A logbook id is required for review.');
+}
 
 const setText = (selector, value) => { document.querySelector(selector).textContent = value || '—'; };
 try {
@@ -20,7 +27,7 @@ try {
   }
 } catch (error) {
   alert(`Unable to load logbook: ${error.message}`);
-  window.location.href = 'supervisor_dashboard.html';
+  window.location.href = homeForUser;
 }
 
 async function submitReview(status) {
@@ -32,9 +39,9 @@ async function submitReview(status) {
     return alert(error);
   }
   alert(`Logbook ${status.toLowerCase()}.`);
-  window.location.href = 'supervisor_dashboard.html';
+  window.location.href = homeForUser;
 }
 
 document.getElementById('approve-btn').addEventListener('click', () => submitReview('Approved'));
 document.getElementById('reject-btn').addEventListener('click', () => submitReview('Rejected'));
-document.getElementById('back-btn').addEventListener('click', () => { window.location.href = 'supervisor_dashboard.html'; });
+document.getElementById('back-btn').addEventListener('click', () => { window.location.href = homeForUser; });
