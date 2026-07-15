@@ -65,7 +65,17 @@
     </div>
 
     <!-- Simple JS script to toggle the data and maintain horizontal layout state -->
-    <script>
+    <script type="module">
+        import { getCurrentUser } from './logbook_service.js';
+
+        const currentUser = await getCurrentUser();
+        if (!currentUser || currentUser.role !== 'admin') {
+            window.location.replace(
+                !currentUser ? 'index.html' : currentUser.role === 'supervisor' ? 'supervisor_dashboard.html' : 'student_dashboard.html'
+            );
+            throw new Error('Only administrators can access user management.');
+        }
+
         const userData = {
             students: [
                 { name: "Jane Doe", email: "jane.doe@university.edu", role: "Student" },
@@ -120,6 +130,8 @@
             // Re-render data
             renderTable(roleKey);
         }
+
+        window.switchTab = switchTab;
 
         // Initialize with students visible
         renderTable('students');
