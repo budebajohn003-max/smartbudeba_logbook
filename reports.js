@@ -2,8 +2,13 @@ import { fetchLogbookStats, getCurrentUser } from './logbook_service.js';
 
 const currentUser = await getCurrentUser();
 if (!currentUser) {
-  window.location.href = 'index.html';
+  window.location.replace('index.html');
+  throw new Error('Authentication is required to view reports.');
 }
+
+// A student report must always be limited to that student's entries. Staff
+// receive the entries permitted by the database RLS policies.
+const reportUserId = currentUser.role === 'student' ? currentUser.id : null;
 
 const form = document.getElementById('reportForm');
 const resultsBox = document.getElementById('resultsPlaceholder');
@@ -58,7 +63,7 @@ form.addEventListener('submit', async function(e) {
   resultsBox.innerHTML = `<strong>Loading ${reportType} data ...</strong>`;
 
   try {
-    const stats = await fetchLogbookStats({ fromDate, toDate });
+    const stats = await fetchLogbookStats({ fromDate, toDate, userId: reportUserId });
     renderStats(stats, reportType);
   } catch (error) {
     console.error('Error fetching report data:', error);
