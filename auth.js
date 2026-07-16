@@ -2,9 +2,14 @@ import { loginUser, registerUser, getCurrentUser, logoutUser } from './logbook_s
 
 const page = window.location.pathname.split('/').pop();
 
+function normalizeRole(role) {
+  return role ? String(role).trim().toLowerCase() : 'student';
+}
+
 function redirectByRole(user) {
-  if (user.role === 'admin') window.location.href = 'admin_dashboard.html';
-  else if (user.role === 'supervisor') window.location.href = 'supervisor_dashboard.html';
+  const role = normalizeRole(user?.role);
+  if (role === 'admin') window.location.href = 'admin_dashboard.html';
+  else if (role === 'supervisor') window.location.href = 'supervisor_dashboard.html';
   else window.location.href = 'student_dashboard.html';
 }
 
