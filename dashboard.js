@@ -1,18 +1,24 @@
 import { getCurrentUser, logoutUser, getMyLogbooks, getPendingLogbooks, fetchLogbookStats } from './logbook_service.js';
 
 const page = window.location.pathname.split('/').pop();
+
+function normalizeRole(role) {
+  return role ? String(role).trim().toLowerCase() : 'student';
+}
+
 const currentUser = await getCurrentUser();
 if (!currentUser) {
   window.location.replace('index.html');
   throw new Error('Authentication is required to view this dashboard.');
 }
 
+const currentRole = normalizeRole(currentUser.role);
 const expectedRole = page === 'student_dashboard.html' ? 'student' : page === 'supervisor_dashboard.html' ? 'supervisor' : null;
-if (expectedRole && currentUser.role !== expectedRole) {
+if (expectedRole && currentRole !== expectedRole) {
   window.location.replace(
-    currentUser.role === 'admin'
+    currentRole === 'admin'
       ? 'admin_dashboard.html'
-      : currentUser.role === 'supervisor'
+      : currentRole === 'supervisor'
         ? 'supervisor_dashboard.html'
         : 'student_dashboard.html',
   );
